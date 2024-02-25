@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import shutil
 
 from .buildsys import *
 from .testbench import testbench
@@ -103,9 +104,7 @@ def verilog_top(project):
         top_data.append("    );")
         top_data.append("")
         project["verilog_files"].append("blink.v")
-        os.system(
-            f"cp -a generators/gateware/blink.v* {project['SOURCE_PATH']}/blink.v"
-        )
+        shutil.copy(f"generators/gateware/blink.v", f"{project['SOURCE_PATH']}/blink.v");
 
     if "error" in project["jdata"]:
         if project["jdata"]["error"].get("invert"):
@@ -371,9 +370,7 @@ def generate(project):
 
     # general verilog-files
     project["verilog_files"].append("debouncer.v")
-    os.system(
-        f"cp -a generators/gateware/debouncer.v* {project['SOURCE_PATH']}/debouncer.v"
-    )
+    shutil.copy("generators/gateware/debouncer.v", f"{project['SOURCE_PATH']}/debouncer.v")
 
     # system clock (pll setup)
     if project["internal_clock"]:

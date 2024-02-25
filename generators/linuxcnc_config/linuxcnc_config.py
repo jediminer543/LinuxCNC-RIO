@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 
 axis_names = ["X", "Y", "Z", "A", "C", "B", "U", "V", "W"]
 netlist = []
@@ -1884,19 +1885,15 @@ def generate_rio_gui(project):
     cfgxml_data += gui_gen.draw_end()
 
     if gui == "qtdragon":
-        os.system(f"mkdir -p {project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd")
-        os.system(
-            f"cp -a generators/linuxcnc_config/rio_hd/* {project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd/"
-        )
-        os.system(
-            f"cat generators/linuxcnc_config/rio_hd/rio_hd.ui.pre > {project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd/rio_hd.ui"
-        )
-        open(
-            f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd/rio_hd.ui", "a"
-        ).write("\n".join(cfgxml_data))
-        os.system(
-            f"cat generators/linuxcnc_config/rio_hd/rio_hd.ui.post >> {project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd/rio_hd.ui"
-        )
+        os.makedirs(f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd", exist_ok=True)
+        shutil.copytree(f"generators/linuxcnc_config/rio_hd/", f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd/", dirs_exist_ok=True)
+        #shutil.copy(f"generators/linuxcnc_config/rio_hd/rio_hd.ui.pre", f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd/rio_hd.ui")
+        with hdui as open(f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/rio_hd/rio_hd.ui", "w"):
+            with uipre as open(f"generators/linuxcnc_config/rio_hd/rio_hd.ui.pre", r):
+                shutil.copyfileobj(uipre, hdui)
+            hdui.write("\n".join(cfgxml_data))
+            with uipre as open(f"generators/linuxcnc_config/rio_hd/rio_hd.ui.post", r):
+                shutil.copyfileobj(uipre, hdui)
 
     else:
         open(f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/rio-gui.xml", "w").write(
@@ -1924,6 +1921,4 @@ def generate(project):
     generate_rio_gui(project)
     generate_tool_tbl(project)
 
-    os.system(
-        f"cp -a generators/linuxcnc_config/linuxcnc.var {project['LINUXCNC_PATH']}/ConfigSamples/rio"
-    )
+    shutil.copy("generators/linuxcnc_config/linuxcnc.var", f"{project['LINUXCNC_PATH']}/ConfigSamples/rio")

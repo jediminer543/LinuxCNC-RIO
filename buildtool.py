@@ -4,6 +4,7 @@
 
 import argparse
 import os
+import shutil
 
 import projectLoader
 
@@ -24,17 +25,15 @@ def main(configfile, outputdir=None):
     project["SOURCE_PATH"] = f"{project['GATEWARE_PATH']}"
     project["PINS_PATH"] = f"{project['GATEWARE_PATH']}"
     project["LINUXCNC_PATH"] = f"{project['OUTPUT_PATH']}/LinuxCNC"
-    os.system(f"mkdir -p {project['OUTPUT_PATH']}")
-    os.system(f"mkdir -p {project['SOURCE_PATH']}")
-    os.system(f"mkdir -p {project['PINS_PATH']}")
-    os.system(f"mkdir -p {project['LINUXCNC_PATH']}")
-    os.system(f"mkdir -p {project['LINUXCNC_PATH']}/Components/")
-    os.system(f"mkdir -p {project['LINUXCNC_PATH']}/ConfigSamples/rio")
-    os.system(f"mkdir -p {project['LINUXCNC_PATH']}/ConfigSamples/rio/subroutines")
-    os.system(f"mkdir -p {project['LINUXCNC_PATH']}/ConfigSamples/rio/m_codes")
-    os.system(
-        f"cp -a files/subroutines/* {project['LINUXCNC_PATH']}/ConfigSamples/rio/subroutines"
-    )
+    os.makedirs(project['OUTPUT_PATH'], exist_ok=True)
+    os.makedirs(project['SOURCE_PATH'], exist_ok=True)
+    os.makedirs(project['PINS_PATH'], exist_ok=True)
+    os.makedirs(project['LINUXCNC_PATH'], exist_ok=True)
+    os.makedirs(f"{project['LINUXCNC_PATH']}/Components/", exist_ok=True)
+    os.makedirs(f"{project['LINUXCNC_PATH']}/ConfigSamples/rio", exist_ok=True)
+    os.makedirs(f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/subroutines", exist_ok=True)
+    os.makedirs(f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/m_codes", exist_ok=True)
+    shutil.copytree("files/subroutines/", f"{project['LINUXCNC_PATH']}/ConfigSamples/rio/subroutines", dirs_exist_ok=True)
 
     if project["verilog_defines"]:
         verilog_defines = []
@@ -60,7 +59,7 @@ def main(configfile, outputdir=None):
                 ipv_path = f"plugins/{plugin}/{ipv}"
                 if not os.path.isfile(ipv_path):
                     ipv_path = f"generators/gateware/{ipv}"
-                os.system(f"cp -a {ipv_path} {project['SOURCE_PATH']}/{ipv_name}")
+                shutil.copy(f"{ipv_path}", f"{project['SOURCE_PATH']}/{ipv_name}")
                 """
                 if ipv.endswith(".v") and not ipv.startswith("PLL_"):
                     os.system(
@@ -74,9 +73,7 @@ def main(configfile, outputdir=None):
                 component_path = f"plugins/{plugin}/{component}"
                 if not os.path.isfile(component_path):
                     component_path = f"generators/firmware/{component}"
-                os.system(
-                    f"cp -a {component_path} {project['LINUXCNC_PATH']}/Components/{component}"
-                )
+                shutil.copytree(f"{component_path}", f"{project['SOURCE_PATH']}/Components/{component}", dirs_exist_ok=True)
 
     print(f"generating files in {project['OUTPUT_PATH']}")
 
@@ -98,4 +95,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    main(args.configfile, args.outputdir)
+    if (args.configfile == None):
+        parser.print_help()
+    else:
+        main(args.configfile, args.outputdir)

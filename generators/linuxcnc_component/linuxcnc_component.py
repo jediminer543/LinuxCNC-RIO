@@ -1,6 +1,7 @@
 import os
 import sys
-
+import shutil
+import glob
 
 def generate(project):
     print("generating linux-cnc component")
@@ -388,9 +389,7 @@ def generate(project):
 
     open(f"{project['LINUXCNC_PATH']}/Components/rio.h", "w").write("\n".join(rio_data))
 
-    os.system(
-        f"cp -a generators/linuxcnc_component/*.c {project['LINUXCNC_PATH']}/Components/"
-    )
-    os.system(
-        f"cp -a generators/linuxcnc_component/*.h {project['LINUXCNC_PATH']}/Components/"
-    )
+    for file in glob.glob('generators/linuxcnc_component/*.c'):
+        shutil.copy(file, f"{project['LINUXCNC_PATH']}/Components/")
+    for file in glob.glob('generators/linuxcnc_component/*.h'):
+        shutil.copy(file, f"{project['LINUXCNC_PATH']}/Components/")

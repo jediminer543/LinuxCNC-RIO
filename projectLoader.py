@@ -62,7 +62,7 @@ def load(configfile):
     # loading modules
     project["modules"] = {}
     for path in glob.glob("modules/*.json"):
-        module = path.split("/")[1].split(".")[0]
+        module = path.split(os.sep)[1].split(".")[0]
         mdata = open(path, "r").read()
         project["modules"][module] = json.loads(mdata)
 
@@ -127,14 +127,14 @@ def load(configfile):
     # loading plugins
     project["plugins"] = {}
     for path in sorted(glob.glob("plugins/*")):
-        plugin = path.split("/")[1]
+        plugin = path.split(os.sep)[1]
         if os.path.isfile(f"plugins/{plugin}/plugin.py"):
             vplugin = importlib.import_module(".plugin", f"plugins.{plugin}")
             project["plugins"][plugin] = vplugin.Plugin(project["jdata"])
 
     project["generators"] = {}
     for path in glob.glob("generators/*"):
-        generator = path.split("/")[1]
+        generator = path.split(os.sep)[1]
         if os.path.isfile(f"generators/{generator}/{generator}.py"):
             project["generators"][generator] = importlib.import_module(
                 f".{generator}", f"generators.{generator}"
